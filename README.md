@@ -1,35 +1,79 @@
-# GS-Softwares Agreement Studio
+<div align="center">
+  <img src="favicon.svg" alt="GS-Softwares Agreement Studio icon" width="88" height="88">
+  <h1>GS-Softwares Agreement Studio</h1>
+  <p><strong>Create, customize, preview, and print website development agreements.</strong></p>
+  <p>
+    <a href="https://github.com/gs-softwares-code/Contract"><img src="https://img.shields.io/badge/GitHub-Repository-181717?style=for-the-badge&logo=github&logoColor=white" alt="GitHub repository"></a>
+    <img src="https://img.shields.io/badge/HTML5-Static%20Web%20App-E34F26?style=for-the-badge&logo=html5&logoColor=white" alt="HTML5 static web app">
+    <img src="https://img.shields.io/badge/No%20Build%20Required-Ready%20to%20Run-16a34a?style=for-the-badge&logo=checkmarx&logoColor=white" alt="No build required">
+  </p>
+</div>
 
-A browser-based website development agreement generator from GS-Softwares. Edit client and project details in a form, preview the agreement as an A4 document, and print it or save it as a PDF.
+---
 
-## Features
+## ✨ Overview
 
-- Live agreement preview with editable client, date, scope, and timeline fields
-- Default website-development agreement and Annexure A scope sheet
-- A4 print layout with optional border and print-friendly pagination
-- Zoom controls and optional highlights for fields that need attention
-- Automatic saving of form values in the browser's local storage
-- Responsive layout for desktop and mobile
+Agreement Studio is a lightweight, browser-based tool for preparing a website development agreement. Update client and project details in the editor and see them reflected immediately in an A4 document preview. Print the agreement or save it as a PDF from your browser.
 
-## Run the app
+## 🚀 Features
 
-This is a static, single-file web app; no build step or package installation is required.
+- **Live editing:** Update agreement date, client details, demo URL, scope limits, timelines, revision rounds, and support terms.
+- **Complete template:** Includes the website development agreement, signature blocks, and an Annexure A scope sheet.
+- **Print-ready output:** A4 page styling, print pagination, optional document border, and browser print/PDF export.
+- **Convenient preview:** Zoom controls, editable-field highlights, and responsive controls for mobile screens.
+- **Automatic local saving:** Form entries persist in the browser's local storage between visits.
+- **No build pipeline:** A single HTML file; no package manager or compilation step needed.
 
-1. Download or clone this repository.
-2. Open `index.html` in a modern browser. For local server preview, run `python -m http.server 8000` from the repository directory and visit `http://localhost:8000`.
-3. Fill in the document fields. Use **Use Today's Date** to populate the agreement date.
-4. Select **Print / Save PDF** and choose **Save as PDF** in the browser's print dialog.
+## 🧰 Built with
 
-The app loads Tailwind CSS, Lucide icons, and fonts from third-party CDNs, so an internet connection is needed for those assets. Printing and PDF output use the browser's print functionality.
+<p>
+  <img src="https://img.shields.io/badge/HTML5-E34F26?style=flat-square&logo=html5&logoColor=white" alt="HTML5">
+  <img src="https://img.shields.io/badge/JavaScript-F7DF1E?style=flat-square&logo=javascript&logoColor=black" alt="JavaScript">
+  <img src="https://img.shields.io/badge/Tailwind%20CSS-38B2AC?style=flat-square&logo=tailwindcss&logoColor=white" alt="Tailwind CSS">
+  <img src="https://img.shields.io/badge/Lucide-Icons-F56565?style=flat-square" alt="Lucide icons">
+</p>
 
-## Data and privacy
+The page loads Tailwind CSS, Lucide icons, and Google Fonts from third-party CDNs. An internet connection is required for these visual assets; the browser's native print feature handles PDF generation.
 
-Form values are saved in the current browser using local storage under `gs_softwares_agreement_v1`. They are not submitted to a server by this app. Use **Reset** to clear the saved values and restore the template defaults. Avoid using a shared browser profile for confidential client information.
+## 📦 Getting started
 
-## Important
+### Open locally
 
-This project provides a document-generation template, not legal advice. Review and adapt the agreement to the transaction and applicable law, and consult a qualified legal professional before relying on it. Check all names, contact details, amounts, dates, and terms before signing or sharing a generated document.
+1. Clone or download this repository.
+2. Open `index.html` in a modern browser.
+3. Fill in the agreement fields and review the generated document.
+4. Select **Print / Save PDF**, then choose **Save as PDF** in the print dialog.
 
-## License
+### Serve locally (optional)
 
-No license is currently specified in this repository. Contact the repository owner before redistributing or reusing the code.
+From the repository directory, run:
+
+```bash
+python -m http.server 8000
+```
+
+Then open [http://localhost:8000](http://localhost:8000).
+
+## 📝 Using the editor
+
+1. Enter the agreement date manually or select **Use Today's Date**.
+2. Complete the client details and add the approved demo/reference URL.
+3. Adjust scope limits and timeline or support values as needed.
+4. Review the preview for empty highlighted fields, then print or save as PDF.
+5. Use **Reset** to clear saved entries and restore the template defaults.
+
+## 🔒 Privacy
+
+The app stores form values only in the browser's local storage, using the key `gs_softwares_agreement_v1`. It does not submit form data to a backend. On shared devices, clear the stored data after use and avoid entering confidential information.
+
+## ⚖️ Legal notice
+
+This application is a document template and is **not legal advice**. The included agreement contains preset terms and amounts. Review and adapt the document for each transaction and applicable law, and seek advice from a qualified legal professional before signing or relying on it.
+
+## 🖼️ App icon
+
+The repository favicon is [`favicon.svg`](favicon.svg). The app also defines its browser-tab icon inline in `index.html`.
+
+## 📄 License
+
+No license is currently specified. All rights are reserved by default; contact the repository owner before redistributing or reusing this project.
