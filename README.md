@@ -11,11 +11,11 @@
 
 ---
 
-## ✨ Overview
+##  Overview
 
 Agreement Studio is a lightweight, browser-based tool for preparing a website development agreement. Update client and project details in the editor and see them reflected immediately in an A4 document preview. Print the agreement or save it as a PDF from your browser.
 
-## 🚀 Features
+##  Features
 
 - **Live editing:** Update agreement date, client details, demo URL, scope limits, timelines, revision rounds, and support terms.
 - **Complete template:** Includes the website development agreement, signature blocks, and an Annexure A scope sheet.
@@ -24,7 +24,7 @@ Agreement Studio is a lightweight, browser-based tool for preparing a website de
 - **Automatic local saving:** Form entries persist in the browser's local storage between visits.
 - **No build pipeline:** A single HTML file; no package manager or compilation step needed.
 
-## 🧰 Built with
+##  Built with
 
 <p>
   <img src="https://img.shields.io/badge/HTML5-E34F26?style=flat-square&logo=html5&logoColor=white" alt="HTML5">
@@ -35,7 +35,7 @@ Agreement Studio is a lightweight, browser-based tool for preparing a website de
 
 The page loads Tailwind CSS, Lucide icons, and Google Fonts from third-party CDNs. An internet connection is required for these visual assets; the browser's native print feature handles PDF generation.
 
-## 📦 Getting started
+##  Getting started
 
 ### Open locally
 
@@ -54,7 +54,7 @@ python -m http.server 8000
 
 Then open [http://localhost:8000](http://localhost:8000).
 
-## 📝 Using the editor
+##  Using the editor
 
 1. Enter the agreement date manually or select **Use Today's Date**.
 2. Complete the client details and add the approved demo/reference URL.
@@ -62,15 +62,15 @@ Then open [http://localhost:8000](http://localhost:8000).
 4. Review the preview for empty highlighted fields, then print or save as PDF.
 5. Use **Reset** to clear saved entries and restore the template defaults.
 
-## 🔒 Privacy
+##  Privacy
 
 The app stores form values only in the browser's local storage, using the key `gs_softwares_agreement_v1`. It does not submit form data to a backend. On shared devices, clear the stored data after use and avoid entering confidential information.
 
-## ⚖️ Legal notice
+##  Legal notice
 
 This application is a document template and is **not legal advice**. The included agreement contains preset terms and amounts. Review and adapt the document for each transaction and applicable law, and seek advice from a qualified legal professional before signing or relying on it.
 
-## 🖼️ App icon
+##  App icon
 
 The repository favicon is [`favicon.svg`](favicon.svg). The app also defines its browser-tab icon inline in `index.html`.
 
