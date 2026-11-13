@@ -1,0 +1,956 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>GS-Softwares | Agreement Generator & Print Studio</title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Google Fonts: Inter for UI, Merriweather & Inter for crisp legal document typography -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Merriweather:ital,wght@0,400;0,700;1,400&display=swap" rel="stylesheet">
+    <!-- Lucide Icons -->
+    <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Cdefs%3E%3ClinearGradient id='g' x1='0' y1='0' x2='1' y2='1'%3E%3Cstop stop-color='%237C5CFC'/%3E%3Cstop offset='1' stop-color='%2300C6FF'/%3E%3C/linearGradient%3E%3C/defs%3E%3Crect width='64' height='64' rx='17' fill='%230B1020'/%3E%3Cpath d='M43 17H27a12 12 0 0 0-12 12v6a12 12 0 0 0 12 12h16V33H29v8h6' fill='none' stroke='url(%23g)' stroke-width='6' stroke-linecap='round' stroke-linejoin='round'/%3E%3Cpath d='M39 17h10' stroke='%2300C6FF' stroke-width='4' stroke-linecap='round'/%3E%3C/svg%3E">
+    <script src="https://unpkg.com/lucide@latest"></script>
+
+    <style>
+        /* Custom Font Assignments */
+        body {
+            font-family: 'Inter', sans-serif;
+        }
+        .doc-font {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+        }
+
+        /* A4 Paper Dimensions & Screen Preview Styling */
+        .a4-sheet {
+            width: 210mm;
+            min-height: 297mm;
+            padding: 15mm 17mm;
+            margin: 0 auto 24px auto;
+            background: white;
+            box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1), 0 8px 10px -6px rgba(0, 0, 0, 0.1);
+            color: #111827;
+            font-size: 9.75pt;
+            line-height: 1.48;
+            position: relative;
+            box-sizing: border-box;
+        }
+
+        /* Formal Double-Frame Legal Document Border (Screen Preview) */
+        body.with-border .a4-sheet::before {
+            content: "";
+            position: absolute;
+            top: 8mm;
+            right: 8mm;
+            bottom: 8mm;
+            left: 8mm;
+            border: 1.5pt solid #1e293b;
+            outline: 0.5pt solid #64748b;
+            outline-offset: -3pt;
+            pointer-events: none;
+            z-index: 10;
+        }
+
+        /* Subtle highlight for editable fields on screen so user can spot changes easily */
+        .dynamic-field {
+            background-color: #eff6ff;
+            color: #1d4ed8;
+            padding: 0 3px;
+            border-radius: 3px;
+            font-weight: 600;
+            border-bottom: 1px dashed #93c5fd;
+            transition: all 0.2s ease;
+        }
+        .dynamic-field.is-empty {
+            background-color: #fef2f2;
+            color: #dc2626;
+            border-bottom: 1px dashed #fca5a5;
+        }
+
+        /* Toggleable highlight off state */
+        body.hide-highlights .dynamic-field {
+            background-color: transparent !important;
+            color: inherit !important;
+            padding: 0 !important;
+            border-bottom: none !important;
+            font-weight: 600;
+        }
+
+        /* Custom Scrollbar for Sidebar */
+        ::-webkit-scrollbar {
+            width: 6px;
+            height: 6px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #f1f5f9;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #cbd5e1;
+            border-radius: 3px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: #94a3b8;
+        }
+
+        /* =====================================================================
+           PRINT / HIGH QUALITY PDF EXPORT STYLES
+           ===================================================================== */
+        @media print {
+            @page {
+                size: A4 portrait;
+                margin: 10mm;
+            }
+
+            html, body {
+                background: #ffffff !important;
+                margin: 0 !important;
+                padding: 0 !important;
+                width: 100% !important;
+                height: auto !important;
+                overflow: visible !important;
+                -webkit-print-color-adjust: exact !important;
+                print-color-adjust: exact !important;
+            }
+
+            /* Dedicated Fixed Page Border inside the @page printable area (never clipped) */
+            #print-page-border {
+                display: none;
+            }
+            body.with-border #print-page-border {
+                display: block !important;
+                position: fixed;
+                top: 0;
+                right: 0;
+                bottom: 0;
+                left: 0;
+                border: 1.5pt solid #0f172a;
+                outline: 0.5pt solid #475569;
+                outline-offset: -3.5pt;
+                pointer-events: none;
+                z-index: 9999;
+            }
+
+            /* Repeating top & bottom spacing on EVERY printed page via table header/footer groups */
+            .print-layout-table {
+                width: 100% !important;
+                border-collapse: collapse !important;
+            }
+            .print-page-header-space {
+                height: 8mm !important;
+            }
+            .print-page-footer-space {
+                height: 8mm !important;
+            }
+            .print-page-body-cell {
+                padding-left: 8mm !important;
+                padding-right: 8mm !important;
+            }
+
+            /* Hide all UI chrome (sidebar, topbar, mobile buttons, toast) */
+            .no-print {
+                display: none !important;
+            }
+
+            /* Reset preview wrapper so pages flow naturally across print sheets */
+            #preview-container {
+                padding: 0 !important;
+                margin: 0 !important;
+                background: transparent !important;
+                overflow: visible !important;
+                display: block !important;
+                width: 100% !important;
+            }
+
+            #zoom-wrapper {
+                transform: none !important;
+                width: 100% !important;
+                margin: 0 !important;
+            }
+
+            /* Clean inner spacing inside the printed page margin */
+            .a4-sheet {
+                width: 100% !important;
+                min-height: auto !important;
+                padding: 0 !important;
+                margin: 0 !important;
+                box-shadow: none !important;
+                border: none !important;
+                font-size: 9.5pt !important;
+                line-height: 1.5 !important;
+            }
+
+            .a4-sheet::before {
+                display: none !important;
+            }
+
+            /* Clean ink-ready text for dynamic variables */
+            .dynamic-field {
+                background-color: transparent !important;
+                color: #000000 !important;
+                padding: 0 !important;
+                border: none !important;
+                font-weight: 600 !important;
+            }
+
+            /* Smart Pagination Controls & Paragraph Breathing Room */
+            .clause-block {
+                break-inside: avoid;
+                page-break-inside: avoid;
+                margin-bottom: 9pt !important;
+                padding-bottom: 1pt !important;
+            }
+
+            .signature-block {
+                break-inside: avoid;
+                page-break-inside: avoid;
+                margin-top: 14pt !important;
+            }
+
+            .annexure-page-break {
+                break-before: page;
+                page-break-before: always;
+                margin-top: 0 !important;
+                padding-top: 2pt !important;
+            }
+        }
+    </style>
+</head>
+<body class="bg-slate-200 text-slate-800 h-screen flex flex-col overflow-hidden with-border">
+
+    <!-- Dedicated Print-Only Repeating Page Border Frame -->
+    <div id="print-page-border" aria-hidden="true"></div>
+
+    <!-- Top Navigation / Action Header (Hidden in Print) -->
+    <header class="no-print bg-slate-900 text-white px-4 py-3 flex items-center justify-between shadow-md z-30 shrink-0">
+        <div class="flex items-center gap-3">
+            <button id="mobile-toggle-btn" class="lg:hidden p-2 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-200 transition" title="Toggle Settings">
+                <i data-lucide="sliders-horizontal" class="w-5 h-5"></i>
+            </button>
+            <div class="flex items-center gap-2.5">
+                <div class="w-8 h-8 rounded-lg bg-blue-600 flex items-center justify-center font-bold text-white shadow-inner">
+                    GS
+                </div>
+                <div>
+                    <h1 class="font-semibold text-sm sm:text-base leading-tight">Agreement Studio</h1>
+                    <p class="text-[11px] text-slate-400 hidden sm:block">A4 Print-Ready Legal Contract Generator</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Center Zoom & Highlight Controls -->
+        <div class="hidden md:flex items-center gap-2.5 bg-slate-800/80 px-3 py-1.5 rounded-xl border border-slate-700">
+            <button id="toggle-border-btn" class="flex items-center gap-1.5 text-xs font-medium text-emerald-300 hover:text-white px-2 py-1 rounded-md bg-slate-700/60 transition" title="Toggle formal page border for PDF">
+                <i data-lucide="square" class="w-3.5 h-3.5"></i>
+                <span id="border-label">Border: ON</span>
+            </button>
+            <button id="toggle-highlights-btn" class="flex items-center gap-1.5 text-xs font-medium text-blue-300 hover:text-white px-2 py-1 rounded-md bg-slate-700/60 transition" title="Toggle blue highlights on edited fields">
+                <i data-lucide="highlighter" class="w-3.5 h-3.5"></i>
+                <span id="highlight-label">Highlights: ON</span>
+            </button>
+            <div class="h-4 w-[1px] bg-slate-700"></div>
+            <div class="flex items-center gap-1">
+                <button onclick="adjustZoom(-0.1)" class="p-1 hover:bg-slate-700 rounded text-slate-300" title="Zoom Out">
+                    <i data-lucide="zoom-out" class="w-4 h-4"></i>
+                </button>
+                <span id="zoom-level" class="text-xs font-mono w-12 text-center text-slate-300">100%</span>
+                <button onclick="adjustZoom(0.1)" class="p-1 hover:bg-slate-700 rounded text-slate-300" title="Zoom In">
+                    <i data-lucide="zoom-in" class="w-4 h-4"></i>
+                </button>
+                <button onclick="resetZoom()" class="text-[11px] text-slate-400 hover:text-white px-1.5 py-0.5 rounded hover:bg-slate-700 ml-1">
+                    Fit
+                </button>
+            </div>
+        </div>
+
+        <!-- Right Actions -->
+        <div class="flex items-center gap-2">
+            <button onclick="resetDefaults()" class="hidden sm:flex items-center gap-1.5 px-3 py-2 rounded-lg text-xs font-medium bg-slate-800 hover:bg-slate-700 text-slate-300 border border-slate-700 transition" title="Reset all fields to default">
+                <i data-lucide="rotate-ccw" class="w-3.5 h-3.5"></i>
+                <span>Reset</span>
+            </button>
+            <button onclick="triggerPrint()" class="flex items-center gap-2 px-4 py-2 rounded-lg text-xs sm:text-sm font-semibold bg-blue-600 hover:bg-blue-500 active:bg-blue-700 text-white shadow-lg shadow-blue-600/30 transition cursor-pointer">
+                <i data-lucide="printer" class="w-4 h-4"></i>
+                <span>Print / Save PDF</span>
+            </button>
+        </div>
+    </header>
+
+    <!-- Main Workspace Split View -->
+    <div class="flex-1 flex overflow-hidden relative">
+
+        <!-- LEFT SETTINGS SIDEBAR (Hidden in Print) -->
+        <aside id="settings-sidebar" class="no-print w-full sm:w-96 bg-white border-r border-slate-300 flex flex-col h-full z-20 absolute lg:static inset-y-0 left-0 transform -translate-x-full lg:translate-x-0 transition-transform duration-300 ease-in-out shadow-2xl lg:shadow-none">
+            
+            <!-- Sidebar Header -->
+            <div class="p-4 border-b border-slate-200 bg-slate-50 flex items-center justify-between shrink-0">
+                <div>
+                    <h2 class="font-bold text-slate-800 text-sm flex items-center gap-2">
+                        <i data-lucide="sliders" class="w-4 h-4 text-blue-600"></i>
+                        Document Variables
+                    </h2>
+                    <p class="text-xs text-slate-500 mt-0.5">Edit bracketed fields below to update live</p>
+                </div>
+                <button id="close-sidebar-btn" class="lg:hidden p-1.5 rounded-lg text-slate-500 hover:bg-slate-200">
+                    <i data-lucide="x" class="w-5 h-5"></i>
+                </button>
+            </div>
+
+            <!-- Scrollable Form Fields -->
+            <div class="flex-1 overflow-y-auto p-4 space-y-6">
+
+                <!-- Group 1: Agreement Date -->
+                <div class="space-y-3">
+                    <div class="flex items-center justify-between">
+                        <h3 class="text-xs font-bold uppercase tracking-wider text-slate-400">1. Agreement Date</h3>
+                        <button onclick="setTodayDate()" class="text-[11px] font-medium text-blue-600 hover:text-blue-800 hover:underline">
+                            Use Today's Date
+                        </button>
+                    </div>
+                    <div class="grid grid-cols-2 gap-2.5">
+                        <div>
+                            <label class="block text-xs font-medium text-slate-700 mb-1">Day [Date]</label>
+                            <input type="text" data-field="dateDay" placeholder="e.g., 13th" class="w-full px-3 py-2 text-sm bg-slate-50 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition">
+                        </div>
+                        <div>
+                            <label class="block text-xs font-medium text-slate-700 mb-1">[Month, Year]</label>
+                            <input type="text" data-field="monthYear" placeholder="e.g., November, 2026" class="w-full px-3 py-2 text-sm bg-slate-50 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition">
+                        </div>
+                    </div>
+                </div>
+                <!-- Group 2: Developer Details (Hardcoded & Locked) -->
+                <div class="space-y-3">
+                    <div class="flex items-center justify-between">
+                        <h3 class="text-xs font-bold uppercase tracking-wider text-slate-400">2. Developer Details</h3>
+                        <span class="text-[10px] font-semibold uppercase tracking-wide px-2 py-0.5 rounded bg-emerald-100 text-emerald-700">Hardcoded</span>
+                    </div>
+                    <div>
+                        <label class="block text-xs font-medium text-slate-700 mb-1">Proprietor Name</label>
+                        <input type="text" value="Gulshan Singh" readonly class="w-full px-3 py-2 text-sm bg-slate-100 text-slate-600 font-medium border border-slate-300 rounded-lg cursor-not-allowed outline-none">
+                    </div>
+                    <div>
+                        <label class="block text-xs font-medium text-slate-700 mb-1">Developer Phone Number</label>
+                        <input type="text" value="+91 8284936742" readonly class="w-full px-3 py-2 text-sm bg-slate-100 text-slate-600 font-medium border border-slate-300 rounded-lg cursor-not-allowed outline-none">
+                    </div>
+                </div>
+
+                <hr class="border-slate-200">
+
+                <!-- Group 3: Client Details -->
+                <div class="space-y-3">
+                    <h3 class="text-xs font-bold uppercase tracking-wider text-slate-400">3. Client Details</h3>
+                    <div>
+                        <label class="block text-xs font-medium text-slate-700 mb-1">[Client Business Name]</label>
+                        <input type="text" data-field="clientBusiness" placeholder="e.g., Sharma Enterprises" class="w-full px-3 py-2 text-sm bg-slate-50 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition">
+                    </div>
+                    <div>
+                        <label class="block text-xs font-medium text-slate-700 mb-1">[Client Owner Name]</label>
+                        <input type="text" data-field="clientOwner" placeholder="e.g., Rajesh Sharma" class="w-full px-3 py-2 text-sm bg-slate-50 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition">
+                    </div>
+                    <div>
+                        <label class="block text-xs font-medium text-slate-700 mb-1">[Client Address]</label>
+                        <textarea rows="2" data-field="clientAddress" placeholder="Full business address, City, State" class="w-full px-3 py-2 text-sm bg-slate-50 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition resize-none"></textarea>
+                    </div>
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
+                        <div>
+                            <label class="block text-xs font-medium text-slate-700 mb-1">[Client Phone Number]</label>
+                            <input type="text" data-field="clientPhone" placeholder="+91 98123 45678" class="w-full px-3 py-2 text-sm bg-slate-50 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition">
+                        </div>
+                        <div>
+                            <label class="block text-xs font-medium text-slate-700 mb-1">[Client Email]</label>
+                            <input type="email" data-field="clientEmail" placeholder="client@domain.com" class="w-full px-3 py-2 text-sm bg-slate-50 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition">
+                        </div>
+                    </div>
+                </div>
+
+                <hr class="border-slate-200">
+
+                <!-- Group 4: Project & Annexure A Scope -->
+                <div class="space-y-3">
+                    <h3 class="text-xs font-bold uppercase tracking-wider text-slate-400">4. Scope & Demo Reference</h3>
+                    <div>
+                        <label class="block text-xs font-medium text-slate-700 mb-1">[Demo URL] (Clause 1 & Annexure A)</label>
+                        <input type="url" data-field="demoUrl" placeholder="https://demo-template.vercel.app" class="w-full px-3 py-2 text-sm bg-slate-50 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition">
+                    </div>
+                    <div class="grid grid-cols-2 gap-2.5">
+                        <div>
+                            <label class="block text-xs font-medium text-slate-700 mb-1">Max Services/Items</label>
+                            <input type="number" data-field="maxServices" value="6" class="w-full px-3 py-2 text-sm bg-slate-50 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition">
+                        </div>
+                        <div>
+                            <label class="block text-xs font-medium text-slate-700 mb-1">Max Gallery Photos</label>
+                            <input type="number" data-field="maxGallery" value="8" class="w-full px-3 py-2 text-sm bg-slate-50 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition">
+                        </div>
+                    </div>
+                </div>
+
+                <hr class="border-slate-200">
+
+                <!-- Group 5: Timelines, Revisions & Support -->
+                <div class="space-y-3 pb-6">
+                    <h3 class="text-xs font-bold uppercase tracking-wider text-slate-400">5. Timelines & Terms</h3>
+                    <div class="grid grid-cols-2 gap-2.5">
+                        <div>
+                            <label class="block text-xs font-medium text-slate-700 mb-1">Completion [Days]</label>
+                            <input type="number" data-field="timelineDays" value="7" class="w-full px-3 py-2 text-sm bg-slate-50 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition">
+                        </div>
+                        <div>
+                            <label class="block text-xs font-medium text-slate-700 mb-1">Feedback [Days]</label>
+                            <input type="number" data-field="feedbackDays" value="3" class="w-full px-3 py-2 text-sm bg-slate-50 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition">
+                        </div>
+                        <div>
+                            <label class="block text-xs font-medium text-slate-700 mb-1">Revision [Rounds]</label>
+                            <input type="number" data-field="revisionRounds" value="2" class="w-full px-3 py-2 text-sm bg-slate-50 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition">
+                        </div>
+                        <div>
+                            <label class="block text-xs font-medium text-slate-700 mb-1">Grace Period [Days]</label>
+                            <input type="number" data-field="graceDays" value="15" class="w-full px-3 py-2 text-sm bg-slate-50 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition">
+                        </div>
+                        <div class="col-span-2">
+                            <label class="block text-xs font-medium text-slate-700 mb-1">Post-Launch Support [Days]</label>
+                            <input type="number" data-field="supportDays" value="30" class="w-full px-3 py-2 text-sm bg-slate-50 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition">
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Sidebar Footer Hint -->
+            <div class="p-3 bg-blue-50 border-t border-blue-100 text-[11px] text-blue-800 flex items-start gap-2 shrink-0">
+                <i data-lucide="info" class="w-4 h-4 text-blue-600 shrink-0 mt-0.5"></i>
+                <span>Tip: In the Print dialog, select <strong>"Save as PDF"</strong> and set Margins to <strong>"Default"</strong> or <strong>"None"</strong> with Background Graphics off for crisp A4 output.</span>
+            </div>
+        </aside>
+
+        <!-- RIGHT A4 DOCUMENT PREVIEW CANVAS -->
+        <main id="preview-container" class="flex-1 overflow-auto p-4 sm:p-8 bg-slate-300/80 flex flex-col items-center">
+            
+            <!-- Mobile Quick Bar -->
+            <div class="no-print lg:hidden w-full max-w-[210mm] mb-3 flex items-center justify-between bg-white/90 backdrop-blur px-3 py-2 rounded-xl shadow-sm text-xs">
+                <button onclick="toggleSidebar()" class="font-semibold text-blue-600 flex items-center gap-1.5">
+                    <i data-lucide="edit-3" class="w-3.5 h-3.5"></i> Edit Fields
+                </button>
+                <span class="text-slate-500">A4 Sheet (210 × 297 mm)</span>
+            </div>
+
+            <!-- Zoom Wrapper -->
+            <div id="zoom-wrapper" class="origin-top transition-transform duration-200">
+                
+                <!-- A4 SHEET CONTAINER -->
+                <article id="a4-document" class="a4-sheet doc-font">
+                    <table class="print-layout-table w-full">
+                        <thead aria-hidden="true">
+                            <tr>
+                                <td class="print-page-header-space"></td>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td class="print-page-body-cell">
+                    
+                    <!-- Document Header -->
+                    <div class="border-b-2 border-slate-900 pb-3 mb-5 text-center">
+                        <h1 class="text-lg font-bold tracking-wide uppercase text-slate-950">WEBSITE DEVELOPMENT AGREEMENT</h1>
+                        <p class="text-[8.5pt] text-slate-500 mt-0.5">GS-Softwares • Rupnagar, Punjab, India</p>
+                    </div>
+
+                    <!-- Intro Paragraph -->
+                    <p class="mb-4 text-justify">
+                        This Agreement is made and entered into on this <span class="dynamic-field" data-bind="dateDay">[Date]</span> day of <span class="dynamic-field" data-bind="monthYear">[Month, Year]</span>, by and between:
+                    </p>
+
+                    <!-- Parties Grid / Boxes -->
+                    <div class="grid grid-cols-1 gap-3.5 mb-5">
+                        <!-- Developer Box -->
+                        <div class="border border-slate-300 rounded-md p-3 bg-slate-50/50">
+                            <div class="text-[8.5pt] font-bold uppercase tracking-wider text-slate-700 mb-1">DEVELOPER:</div>
+                            <p class="mb-0.5"><strong>GS-Softwares</strong>, a sole proprietorship having its principal place of business at Rupnagar, Punjab, India.</p>
+                            <p class="mb-0.5">Represented by: <strong>Gulshan Singh</strong>, Proprietor</p>
+                            <p class="mb-0.5">Contact: <strong>+91 8284936742</strong> | gssoftwares.official@gmail.com</p>
+                            <p class="mb-1">Website: <a href="https://gs-softwares-official.vercel.app/" class="text-slate-900 underline">https://gs-softwares-official.vercel.app/</a></p>
+                            <p class="text-[8.5pt] italic text-slate-600">(Hereinafter referred to as the "Developer")</p>
+                        </div>
+
+                        <div class="text-center font-bold text-xs tracking-widest text-slate-700">AND</div>
+
+                        <!-- Client Box -->
+                        <div class="border border-slate-300 rounded-md p-3 bg-slate-50/50">
+                            <div class="text-[8.5pt] font-bold uppercase tracking-wider text-slate-700 mb-1">CLIENT:</div>
+                            <p class="mb-0.5"><span class="dynamic-field" data-bind="clientBusiness">[Client Business Name]</span>, represented by <span class="dynamic-field" data-bind="clientOwner">[Client Owner Name]</span>, having its principal place of business at <span class="dynamic-field" data-bind="clientAddress">[Client Address]</span>.</p>
+                            <p class="mb-1">Contact: <span class="dynamic-field" data-bind="clientPhone">[Client Phone Number]</span> | <span class="dynamic-field" data-bind="clientEmail">[Client Email]</span></p>
+                            <p class="text-[8.5pt] italic text-slate-600">(Hereinafter referred to as the "Client")</p>
+                        </div>
+                    </div>
+
+                    <p class="mb-4 text-justify italic text-slate-700">
+                        (The Developer and the Client are hereinafter collectively referred to as the "Parties" and individually as a "Party".)
+                    </p>
+
+                    <!-- CLAUSES -->
+                    <div class="space-y-3.5 text-justify">
+
+                        <!-- Clause 1 -->
+                        <div class="clause-block">
+                            <h2 class="font-bold text-slate-950 uppercase text-[9.5pt] mb-1">1. SCOPE OF WORK</h2>
+                            <p>The Developer agrees to design, develop, and deploy a business website strictly in accordance with the specifications outlined in Annexure A (the "Scope Sheet"). The approved demo template at <span class="dynamic-field" data-bind="demoUrl">[Demo URL]</span> serves as the definitive design and functional reference. Any work, features, or pages requested by the Client that fall outside the explicit boundaries of Annexure A shall be considered out-of-scope and will be billed separately at the Developer’s prevailing rates.</p>
+                        </div>
+
+                        <!-- Clause 2 -->
+                        <div class="clause-block">
+                            <h2 class="font-bold text-slate-950 uppercase text-[9.5pt] mb-1">2. FINANCIAL TERMS</h2>
+                            <p class="mb-1">The total one-time fee for the services outlined in Annexure A is <strong>₹6,000 (Indian Rupees Six Thousand Only)</strong>, broken down as follows:</p>
+                            <ul class="list-disc pl-5 space-y-0.5">
+                                <li>Custom Business Website Development: <strong>₹5,000</strong></li>
+                                <li>No-Code Owner Admin Application (Content Editing): <strong>₹1,000</strong></li>
+                                <li><em>Note: This fee is exclusive of any applicable Goods and Services Tax (GST) or other statutory levies, which shall be borne by the Client.</em></li>
+                            </ul>
+                        </div>
+
+                        <!-- Clause 3 -->
+                        <div class="clause-block">
+                            <h2 class="font-bold text-slate-950 uppercase text-[9.5pt] mb-1">3. PAYMENT SCHEDULE</h2>
+                            <ul class="list-disc pl-5 space-y-0.5">
+                                <li><strong>Advance Payment:</strong> 50% (₹3,000) is due via UPI prior to the commencement of any work. This advance is strictly non-refundable once development has begun, as it covers immediate labor allocation, infrastructure setup, and domain procurement.</li>
+                                <li><strong>Final Payment:</strong> The remaining 50% (₹3,000) is due in full upon project completion, prior to final handover, credential transfer, or domain go-live.</li>
+                                <li>No exceptions. The Developer retains the right to withhold delivery until the final invoice is cleared.</li>
+                            </ul>
+                        </div>
+
+                        <!-- Clause 4 -->
+                        <div class="clause-block">
+                            <h2 class="font-bold text-slate-950 uppercase text-[9.5pt] mb-1">4. TIMELINE &amp; DEPENDENCIES</h2>
+                            <p class="mb-1">The estimated timeline for completion is <span class="dynamic-field" data-bind="timelineDays">7</span> working days, commencing only after: (a) receipt of the advance payment, and (b) receipt of all required Client content (text, logos, images, pricing).</p>
+                            <ul class="list-disc pl-5">
+                                <li><strong>Client Delays:</strong> Any delay by the Client in providing content, feedback, or approvals will result in a day-for-day extension of the project timeline. The Developer is not liable for missed deadlines caused by Client inaction.</li>
+                            </ul>
+                        </div>
+
+                        <!-- Clause 5 -->
+                        <div class="clause-block">
+                            <h2 class="font-bold text-slate-950 uppercase text-[9.5pt] mb-1">5. CLIENT OBLIGATIONS &amp; WARRANTIES</h2>
+                            <p class="mb-1">The Client agrees to:</p>
+                            <ol class="list-decimal pl-5 space-y-0.5">
+                                <li>Provide accurate, complete, and timely content.</li>
+                                <li>Warrant that they own or have the legal right to use all photos, logos, and text provided to the Developer, and will indemnify the Developer against any third-party copyright or intellectual property claims arising from Client-provided materials.</li>
+                                <li>Provide consolidated, actionable feedback within <span class="dynamic-field" data-bind="feedbackDays">3</span> working days of each review milestone.</li>
+                            </ol>
+                        </div>
+
+                        <!-- Clause 6 -->
+                        <div class="clause-block">
+                            <h2 class="font-bold text-slate-950 uppercase text-[9.5pt] mb-1">6. REVISIONS &amp; SCOPE CREEP</h2>
+                            <ul class="list-disc pl-5 space-y-0.5">
+                                <li>The project includes <span class="dynamic-field" data-bind="revisionRounds">2</span> rounds of revisions limited to the approved design reference in Annexure A.</li>
+                                <li>Additional revision rounds will be billed at ₹300 per round.</li>
+                                <li>Requests for new pages, features, or structural changes constitute a Change Order and will be quoted and billed separately.</li>
+                            </ul>
+                        </div>
+
+                        <!-- Clause 7 -->
+                        <div class="clause-block">
+                            <h2 class="font-bold text-slate-950 uppercase text-[9.5pt] mb-1">7. INTELLECTUAL PROPERTY (THE "BLUEPRINT" RULE)</h2>
+                            <ul class="list-disc pl-5 space-y-0.5">
+                                <li><strong>Client Ownership:</strong> Upon full and final payment, the Client is granted ownership of the specific website instance, final content, and uploaded media.</li>
+                                <li><strong>Developer Retention:</strong> The Developer retains all right, title, and interest in and to all pre-existing code, reusable templates, frameworks, no-code architectures, tools, and proprietary know-how used to build the site. The Developer reserves the right to reuse these foundational elements for other clients.</li>
+                                <li><strong>Portfolio Rights:</strong> The Developer retains the right to display the finished website in its public portfolio and marketing materials, unless the Client explicitly objects in writing prior to launch.</li>
+                            </ul>
+                        </div>
+
+                        <!-- Clause 8 -->
+                        <div class="clause-block">
+                            <h2 class="font-bold text-slate-950 uppercase text-[9.5pt] mb-1">8. DOMAIN &amp; HOSTING INFRASTRUCTURE</h2>
+                            <ul class="list-disc pl-5 space-y-0.5">
+                                <li>The domain name shall be registered in the Client’s name.</li>
+                                <li><strong>First-Year Hosting:</strong> Included in the project fee.</li>
+                                <li><strong>Subsequent Years:</strong> Renewal for domain, hosting, and basic maintenance is ₹1,500/year, payable annually in advance.</li>
+                                <li><strong>Non-Renewal:</strong> If the renewal fee is not paid, the site will be granted a <span class="dynamic-field" data-bind="graceDays">15</span>-day grace period. Thereafter, the Developer reserves the right to suspend services and take the site offline. The Client may request a one-time export of their content prior to suspension.</li>
+                            </ul>
+                        </div>
+
+                        <!-- Clause 9 -->
+                        <div class="clause-block">
+                            <h2 class="font-bold text-slate-950 uppercase text-[9.5pt] mb-1">9. ADMIN APPLICATION &amp; TRAINING</h2>
+                            <p>The fee includes one (1) training session (conducted in-person or via WhatsApp video call). This training is strictly limited to demonstrating how to edit existing content (prices, offers, photos, text) via the provided no-code admin interface. Training on new functionality or custom development is not included.</p>
+                        </div>
+
+                        <!-- Clause 10 -->
+                        <div class="clause-block">
+                            <h2 class="font-bold text-slate-950 uppercase text-[9.5pt] mb-1">10. POST-LAUNCH SUPPORT</h2>
+                            <p class="mb-1">The Developer provides <span class="dynamic-field" data-bind="supportDays">30</span> days of complimentary support from the date of launch, strictly limited to fixing "Bugs."</p>
+                            <ul class="list-disc pl-5 space-y-0.5">
+                                <li><strong>Definition of a Bug:</strong> A verifiable failure of the website to function as explicitly specified in Annexure A.</li>
+                                <li><strong>Exclusions:</strong> Bug fixes do not include new feature development, content entry, design tweaks, or issues arising from the Client’s unauthorized modification of the site or third-party platform updates.</li>
+                            </ul>
+                        </div>
+
+                        <!-- Clause 11 -->
+                        <div class="clause-block">
+                            <h2 class="font-bold text-slate-950 uppercase text-[9.5pt] mb-1">11. NO GUARANTEES OF BUSINESS RESULTS</h2>
+                            <p>The Developer is an engineering partner, not a marketing agency. While the website will be built with basic on-page SEO foundations, the Developer makes no guarantees regarding search engine rankings, website traffic, lead generation, or sales revenue. These outcomes are dependent on external market forces, search engine algorithms, and the Client’s business operations.</p>
+                        </div>
+
+                        <!-- Clause 12 -->
+                        <div class="clause-block">
+                            <h2 class="font-bold text-slate-950 uppercase text-[9.5pt] mb-1">12. LIMITATION OF LIABILITY</h2>
+                            <p>To the maximum extent permitted by Indian law, the Developer’s total aggregate liability for any claims arising out of or related to this Agreement shall be strictly capped at the total fees actually paid by the Client to the Developer under this Agreement. The Developer shall not be liable for any indirect, incidental, or consequential damages, including loss of profits or business interruption.</p>
+                        </div>
+
+                        <!-- Clause 13 -->
+                        <div class="clause-block">
+                            <h2 class="font-bold text-slate-950 uppercase text-[9.5pt] mb-1">13. TERMINATION</h2>
+                            <p class="mb-1">Either Party may terminate this Agreement by providing written notice.</p>
+                            <ul class="list-disc pl-5 space-y-0.5">
+                                <li>If the Client terminates after work has commenced, the advance payment is forfeited as liquidated damages for allocated resources, and the Developer will hand over whatever work has been completed up to that date.</li>
+                                <li>If the Developer terminates due to Client breach (e.g., non-payment, failure to provide content), the Client remains liable for all work completed up to the termination date.</li>
+                            </ul>
+                        </div>
+
+                        <!-- Clause 14 -->
+                        <div class="clause-block">
+                            <h2 class="font-bold text-slate-950 uppercase text-[9.5pt] mb-1">14. GOVERNING LAW, JURISDICTION &amp; ACCEPTANCE</h2>
+                            <ul class="list-disc pl-5 space-y-0.5">
+                                <li><strong>Governing Law:</strong> This Agreement shall be governed by and construed in accordance with the laws of the Republic of India, including the Indian Contract Act, 1872.</li>
+                                <li><strong>Dispute Resolution:</strong> The Parties agree to first attempt to resolve any dispute amicably through good-faith negotiation. If unresolved within 15 days, the dispute shall be subject to the exclusive jurisdiction of the courts located in Rupnagar, Punjab.</li>
+                                <li><strong>Digital Acceptance:</strong> Pursuant to the Information Technology Act, 2000, and the Indian Evidence Act, 1872, explicit approval of this Agreement, Annexure A, or project milestones via WhatsApp message or email from the Client’s registered phone number or email address shall constitute legally binding acceptance and execution of this contract.</li>
+                            </ul>
+                        </div>
+                    </div>
+
+                    <!-- WITNESS & SIGNATURES BLOCK -->
+                    <div class="signature-block mt-6 pt-4 border-t border-slate-300">
+                        <p class="font-semibold mb-4">IN WITNESS WHEREOF, the Parties hereto have executed this Agreement as of the date first written above.</p>
+                        
+                        <div class="grid grid-cols-2 gap-8">
+                            <!-- Developer Signature -->
+                            <div class="border border-slate-200 rounded p-3 bg-slate-50/40">
+                                <p class="font-bold text-slate-900 mb-6">For GS-Softwares (Developer)</p>
+                                <div class="space-y-2.5 text-[9.25pt]">
+                                    <p>Signature: ___________________________</p>
+                                    <p>Name: <strong>Gulshan Singh</strong></p>
+                                    <p>Title: Proprietor</p>
+                                    <p>Date: _______________________________</p>
+                                </div>
+                            </div>
+
+                            <!-- Client Signature -->
+                            <div class="border border-slate-200 rounded p-3 bg-slate-50/40">
+                                <p class="font-bold text-slate-900 mb-6">For <span class="dynamic-field" data-bind="clientBusiness">[Client Business Name]</span> (Client)</p>
+                                <div class="space-y-2.5 text-[9.25pt]">
+                                    <p>Signature: ___________________________</p>
+                                    <p>Name: <span class="dynamic-field" data-bind="clientOwner">[Client Owner Name]</span></p>
+                                    <p>Title: Owner / Authorized Signatory</p>
+                                    <p>Date: _______________________________</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- ANNEXURE A (Starts neatly on a fresh page when printed) -->
+                    <div class="annexure-page-break mt-8 pt-6 border-t-2 border-slate-900">
+                        <div class="bg-slate-900 text-white px-3 py-1.5 rounded-t font-bold text-xs tracking-wider uppercase">
+                            ANNEXURE A: SCOPE SHEET (THE FENCE)
+                        </div>
+                        <div class="border border-t-0 border-slate-300 rounded-b p-4 space-y-4">
+                            
+                            <div>
+                                <h3 class="font-bold text-slate-900 mb-1">1. Approved Design Reference:</h3>
+                                <p class="pl-4 font-mono text-[9pt] bg-slate-50 p-2 rounded border border-slate-200 break-all">
+                                    <span class="dynamic-field" data-bind="demoUrl">[Insert Demo URL Here]</span>
+                                </p>
+                            </div>
+
+                            <div>
+                                <h3 class="font-bold text-slate-900 mb-1">2. Included Pages &amp; Features:</h3>
+                                <ul class="list-disc pl-6 space-y-1">
+                                    <li><strong>Home:</strong> Hero section, brief intro, call-to-action.</li>
+                                    <li><strong>About:</strong> Business story, owner info.</li>
+                                    <li><strong>Services/Products:</strong> Display of up to <span class="dynamic-field" data-bind="maxServices">6</span> items/services.</li>
+                                    <li><strong>Gallery:</strong> Grid display of up to <span class="dynamic-field" data-bind="maxGallery">8</span> photos.</li>
+                                    <li><strong>Offers:</strong> Dedicated section for current promotions.</li>
+                                    <li><strong>Contact:</strong> Integrated WhatsApp chat button and Google Maps embed.</li>
+                                    <li><strong>Mobile-Responsive:</strong> Optimized for mobile, tablet, and desktop viewing.</li>
+                                    <li><strong>Basic On-Page SEO:</strong> Meta titles, descriptions, and proper heading structures.</li>
+                                    <li><strong>Admin App:</strong> No-code interface allowing the Client to independently edit prices, offers, photos, and text.</li>
+                                </ul>
+                            </div>
+
+                            <div>
+                                <h3 class="font-bold text-slate-900 mb-1">3. Explicitly Excluded (Not Included in ₹6,000 Fee):</h3>
+                                <ul class="list-disc pl-6 space-y-1">
+                                    <li>Payment gateways or e-commerce checkout functionality.</li>
+                                    <li>Online food ordering or booking systems.</li>
+                                    <li>Custom feature development beyond the approved demo.</li>
+                                    <li>Professional content writing or copywriting (Client must provide final text).</li>
+                                    <li>Professional photography or graphic design (Client must provide final assets).</li>
+                                </ul>
+                            </div>
+
+                        </div>
+                    </div>
+
+                                </td>
+                            </tr>
+                        </tbody>
+                        <tfoot aria-hidden="true">
+                            <tr>
+                                <td class="print-page-footer-space"></td>
+                            </tr>
+                        </tfoot>
+                    </table>
+                </article>
+            </div>
+        </main>
+    </div>
+
+    <!-- Custom Notification Toast (Replaces alert/confirm) -->
+    <div id="toast" class="no-print fixed bottom-5 right-5 bg-slate-900 text-white px-4 py-2.5 rounded-xl shadow-xl text-xs font-medium flex items-center gap-2 transform translate-y-20 opacity-0 transition-all duration-300 z-50">
+        <i data-lucide="check-circle-2" class="w-4 h-4 text-emerald-400"></i>
+        <span id="toast-msg">Updated!</span>
+    </div>
+
+    <script>
+        // Initialize Lucide Icons
+        lucide.createIcons();
+
+        // Default placeholder mapping when an input is empty
+        const defaultPlaceholders = {
+            dateDay: '[Date]',
+            monthYear: '[Month, Year]',
+            devName: 'Gulshan Singh',
+            devPhone: '+91 8284936742',
+            clientBusiness: '[Client Business Name]',
+            clientOwner: '[Client Owner Name]',
+            clientAddress: '[Client Address]',
+            clientPhone: '[Client Phone Number]',
+            clientEmail: '[Client Email]',
+            demoUrl: '[Demo URL]',
+            maxServices: '6',
+            maxGallery: '8',
+            timelineDays: '7',
+            feedbackDays: '3',
+            revisionRounds: '2',
+            graceDays: '15',
+            supportDays: '30'
+        };
+
+        // Pre-populated defaults
+        const initialValues = {
+            dateDay: '',
+            monthYear: '',
+            devName: 'Gulshan Singh',
+            devPhone: '+91 8284936742',
+            clientBusiness: '',
+            clientOwner: '',
+            clientAddress: '',
+            clientPhone: '',
+            clientEmail: '',
+            demoUrl: '',
+            maxServices: '6',
+            maxGallery: '8',
+            timelineDays: '7',
+            feedbackDays: '3',
+            revisionRounds: '2',
+            graceDays: '15',
+            supportDays: '30'
+        };
+
+        const STORAGE_KEY = 'gs_softwares_agreement_v1';
+        let currentState = { ...initialValues };
+        let currentZoom = 1;
+
+        // DOM Elements
+        const inputs = document.querySelectorAll('[data-field]');
+        const bindings = document.querySelectorAll('[data-bind]');
+        const sidebar = document.getElementById('settings-sidebar');
+        const zoomWrapper = document.getElementById('zoom-wrapper');
+        const zoomLabel = document.getElementById('zoom-level');
+
+        // Initialize State from LocalStorage or Defaults
+        function initApp() {
+            try {
+                const saved = localStorage.getItem(STORAGE_KEY);
+                if (saved) {
+                    const parsed = JSON.parse(saved);
+                    currentState = { ...initialValues, ...parsed };
+                    // Ensure hardcoded developer details remain populated if blank
+                    if (!currentState.devName || !currentState.devName.trim()) {
+                        currentState.devName = 'Gulshan Singh';
+                    }
+                    if (!currentState.devPhone || !currentState.devPhone.trim()) {
+                        currentState.devPhone = '+91 8284936742';
+                    }
+                }
+            } catch (e) {
+                console.warn('Could not load saved state:', e);
+            }
+            syncInputsWithState();
+            renderDocument();
+        }
+
+        // Populate sidebar inputs from currentState
+        function syncInputsWithState() {
+            inputs.forEach(input => {
+                const key = input.dataset.field;
+                if (currentState[key] !== undefined) {
+                    input.value = currentState[key];
+                }
+            });
+        }
+
+        // Update document preview text and styling
+        function renderDocument() {
+            bindings.forEach(el => {
+                const key = el.dataset.bind;
+                const val = (currentState[key] || '').toString().trim();
+
+                if (val) {
+                    el.textContent = val;
+                    el.classList.remove('is-empty');
+                } else {
+                    el.textContent = defaultPlaceholders[key] || `[${key}]`;
+                    el.classList.add('is-empty');
+                }
+            });
+
+            // Save to localStorage
+            try {
+                localStorage.setItem(STORAGE_KEY, JSON.stringify(currentState));
+            } catch (e) {
+                // Ignore storage quota errors
+            }
+        }
+
+        // Attach input listeners for real-time updates
+        inputs.forEach(input => {
+            input.addEventListener('input', (e) => {
+                const key = e.target.dataset.field;
+                currentState[key] = e.target.value;
+                renderDocument();
+            });
+        });
+
+        // Helper: Fill Today's Date with ordinal suffix (1st, 2nd, 3rd, 13th...)
+        function setTodayDate() {
+            const now = new Date();
+            const day = now.getDate();
+            const months = [
+                'January', 'February', 'March', 'April', 'May', 'June',
+                'July', 'August', 'September', 'October', 'November', 'December'
+            ];
+            const monthYear = `${months[now.getMonth()]}, ${now.getFullYear()}`;
+
+            const getOrdinal = (n) => {
+                const s = ['th', 'st', 'nd', 'rd'];
+                const v = n % 100;
+                return n + (s[(v - 20) % 10] || s[v] || s[0]);
+            };
+
+            currentState.dateDay = getOrdinal(day);
+            currentState.monthYear = monthYear;
+
+            syncInputsWithState();
+            renderDocument();
+            showToast("Updated to today's date!");
+        }
+
+        // Reset all fields to hardcoded defaults
+        function resetDefaults() {
+            currentState = { ...initialValues };
+            try {
+                localStorage.removeItem(STORAGE_KEY);
+            } catch (e) {}
+            syncInputsWithState();
+            renderDocument();
+            showToast('Reset to default template values');
+        }
+
+        // Trigger Print / High Quality PDF Save
+        function triggerPrint() {
+            // Set a clean, descriptive document title for the exported PDF filename
+            const originalTitle = document.title;
+            const clientSlug = (currentState.clientBusiness || 'Client')
+                .trim()
+                .replace(/[^a-zA-Z0-9]+/g, '_')
+                .replace(/^_|_$/g, '');
+
+            document.title = `Website_Development_Agreement_${clientSlug || 'GS_Softwares'}`;
+
+            window.print();
+
+            // Restore original page title shortly after print dialog opens
+            setTimeout(() => {
+                document.title = originalTitle;
+            }, 1000);
+        }
+
+        // Zoom Controls
+        function adjustZoom(delta) {
+            currentZoom = Math.min(1.5, Math.max(0.5, +(currentZoom + delta).toFixed(2)));
+            applyZoom();
+        }
+
+        function resetZoom() {
+            currentZoom = 1;
+            applyZoom();
+        }
+
+        function applyZoom() {
+            if (zoomWrapper) {
+                zoomWrapper.style.transform = `scale(${currentZoom})`;
+            }
+            if (zoomLabel) {
+                zoomLabel.textContent = `${Math.round(currentZoom * 100)}%`;
+            }
+        }
+
+        // Toggle Formal Legal Border
+        const borderBtn = document.getElementById('toggle-border-btn');
+        const borderLabel = document.getElementById('border-label');
+        if (borderBtn) {
+            borderBtn.addEventListener('click', () => {
+                const hasBorder = document.body.classList.toggle('with-border');
+                borderLabel.textContent = hasBorder ? 'Border: ON' : 'Border: OFF';
+                borderBtn.classList.toggle('text-emerald-300', hasBorder);
+                borderBtn.classList.toggle('text-slate-400', !hasBorder);
+            });
+        }
+
+        // Toggle Dynamic Field Highlights
+        const highlightsBtn = document.getElementById('toggle-highlights-btn');
+        const highlightLabel = document.getElementById('highlight-label');
+        if (highlightsBtn) {
+            highlightsBtn.addEventListener('click', () => {
+                const hidden = document.body.classList.toggle('hide-highlights');
+                highlightLabel.textContent = hidden ? 'Highlights: OFF' : 'Highlights: ON';
+                highlightsBtn.classList.toggle('text-blue-300', !hidden);
+                highlightsBtn.classList.toggle('text-slate-400', hidden);
+            });
+        }
+
+        // Mobile Sidebar Toggle
+        function toggleSidebar() {
+            sidebar.classList.toggle('-translate-x-full');
+        }
+        document.getElementById('mobile-toggle-btn')?.addEventListener('click', toggleSidebar);
+        document.getElementById('close-sidebar-btn')?.addEventListener('click', toggleSidebar);
+
+        // Toast Notification Helper
+        let toastTimer;
+        function showToast(message) {
+            const toast = document.getElementById('toast');
+            const toastMsg = document.getElementById('toast-msg');
+            if (!toast || !toastMsg) return;
+
+            toastMsg.textContent = message;
+            toast.classList.remove('translate-y-20', 'opacity-0');
+            clearTimeout(toastTimer);
+            toastTimer = setTimeout(() => {
+                toast.classList.add('translate-y-20', 'opacity-0');
+            }, 2500);
+        }
+
+        // Boot application
+        initApp();
+    </script>
+</body>
+</html>
